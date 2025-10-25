@@ -1,41 +1,64 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# ==========================
+# 🌟 EVENTMASTER MOBILE (.gitignore)
+# Proyecto basado en Expo / React Native
+# ==========================
 
-# dependencies
+# --- Dependencias ---
 node_modules/
 
-# Expo
-.expo/
+# --- Archivos de compilación ---
 dist/
+build/
 web-build/
-expo-env.d.ts
+.expo/
+.expo-shared/
+.expo-cache/
 
-# Native
-.kotlin/
-*.orig.*
+# --- Configuración local ---
+.vscode/
+.idea/
+.env
+.env*.local
+
+# --- Archivos de sistema ---
+.DS_Store
+Thumbs.db
+
+# --- Archivos de debug ---
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# --- Archivos de certificados y llaves ---
 *.jks
 *.p8
 *.p12
 *.key
+*.pem
 *.mobileprovision
+*.keystore
 
-# Metro
+# --- Archivos de iOS / Android nativos ---
+ios/
+android/
+.gradle/
+*.orig.*
+
+# --- Metro bundler cache ---
 .metro-health-check*
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
+# --- TypeScript (si aplica) ---
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# --- Carpetas temporales ---
+tmp/
+temp/
+
+# --- Archivos generados ---
+expo-env.d.ts
+
+# --- Backups / Archivos de merge ---
+*.bak
+*.tmp
+*.swp
