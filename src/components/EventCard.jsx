@@ -4,8 +4,9 @@ import { colors } from '../theme/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function EventCard({ event }) {
+  const borderColor = event.color || colors.primary;
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { borderColor: borderColor }]}>
       <View style={styles.header}>
         <View style={[styles.dot, { backgroundColor: event.color || colors.primary }]} />
         <Text style={styles.title}>{event.nombre}</Text>
@@ -44,7 +45,10 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
     borderRadius: 16,
+    // Agregamos espacio a la izquierda para el borde de color
     padding: 16,
+    paddingLeft: 12, // <-- Ajusta el padding para que el contenido no esté pegado al borde
+    // Estilos del Borde de color
     marginBottom: 12,
     shadowColor: '#000',
     shadowOpacity: 0.08,

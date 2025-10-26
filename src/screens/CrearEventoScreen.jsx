@@ -136,7 +136,7 @@ export default function CrearEventoScreen({ navigation }) {
     if (!ok) {
       // muestra el primer error relevante
       const first = errors.nombre || errors.tipo || errors.descripcion ||
-                    errors.fecha || errors.hora || errors.address || errors.coords || errors.dup;
+        errors.fecha || errors.hora || errors.address || errors.coords || errors.dup;
       if (first) Alert.alert('Revisa los datos', first);
       return;
     }
@@ -217,17 +217,17 @@ export default function CrearEventoScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Fecha y Hora</Text>
 
-          <View style={styles.row2}>
-            <TouchableOpacity style={[styles.input, styles.btnField, errors.fecha && styles.inputError]} onPress={() => setShowDate(true)}>
-              <MaterialIcons name="calendar-today" size={18} color={colors.primary} />
-              <Text style={styles.btnFieldText}>{fmtDate(fecha) || 'Seleccionar fecha'}</Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.input, styles.btnField, errors.hora && styles.inputError]} onPress={() => setShowTime(true)}>
-              <MaterialIcons name="schedule" size={18} color={colors.primary} />
-              <Text style={styles.btnFieldText}>{fmtTime(hora) || 'Seleccionar hora'}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={[styles.input, styles.btnField, errors.fecha && styles.inputError]} onPress={() => setShowDate(true)}>
+            <MaterialIcons name="calendar-today" size={18} color={colors.primary} />
+            <Text style={styles.btnFieldText}>{fmtDate(fecha) || 'Seleccionar fecha'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.input, styles.btnField, errors.hora && styles.inputError]} onPress={() => setShowTime(true)}>
+            <MaterialIcons name="schedule" size={18} color={colors.primary} />
+            <Text style={styles.btnFieldText}>{fmtTime(hora) || 'Seleccionar hora'}</Text>
+          </TouchableOpacity>
+
           {errors.fecha && <Text style={styles.err}>{errors.fecha}</Text>}
           {errors.hora && <Text style={styles.err}>{errors.hora}</Text>}
 
@@ -273,24 +273,18 @@ export default function CrearEventoScreen({ navigation }) {
           {errors.coords && <Text style={[styles.err, { marginTop: 6 }]}>{errors.coords}</Text>}
         </View>
 
-        {/* Diseño */}
+        {/* Diseño 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Diseño</Text>
-          <Text style={styles.label}>Color principal</Text>
+         <Text style={styles.label}>Color principal</Text>
           <View style={styles.colorsRow}>
             {COLOR_OPTIONS.map(c => (
               <TouchableOpacity key={c} onPress={() => setColor(c)} style={[styles.colorDot, { backgroundColor: c, borderWidth: color === c ? 3 : 0 }]} />
             ))}
           </View>
-          <Text style={styles.label}>Tema</Text>
-          <View style={styles.themesRow}>
-            {['elegante', 'fiesta', 'natural', 'moderno'].map(t => (
-              <TouchableOpacity key={t} onPress={() => setTema(t)} style={[styles.themePill, tema === t && { borderColor: colors.primary }]}>
-                <Text style={[styles.themeText, tema === t && { color: colors.primary }]}>{t}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
+        */}
+        
 
         {/* Preview */}
         <View style={styles.preview}>
@@ -331,8 +325,8 @@ const styles = StyleSheet.create({
   inputError: { borderWidth: 1.5, borderColor: '#f66' },
   err: { color: '#b00020', fontSize: 12, marginBottom: 6 },
 
-  row2: { flexDirection: 'row', gap: 8 },
-  btnField: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#eef0ff' },
+ 
+  btnField: {flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#eef0ff' },
   btnFieldText: { color: colors.textDark, fontWeight: '600' },
 
   pickerBox: {

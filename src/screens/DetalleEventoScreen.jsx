@@ -23,8 +23,8 @@ export default function DetalleEventoScreen({ navigation, route }) {
   if (!evento) {
     return (
       <GradientBackground>
-        <View style={{ flex:1, justifyContent:'center', alignItems:'center' }}>
-          <Text style={{ color:'#fff' }}>Cargando…</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: '#fff' }}>Cargando…</Text>
         </View>
       </GradientBackground>
     );
@@ -33,7 +33,8 @@ export default function DetalleEventoScreen({ navigation, route }) {
   const onDelete = () => {
     Alert.alert('Eliminar', '¿Deseas eliminar este evento?', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: async () => {
+      {
+        text: 'Eliminar', style: 'destructive', onPress: async () => {
           await deleteEvento(evento.id);
           navigation.navigate('Gestion');
         }
@@ -43,7 +44,7 @@ export default function DetalleEventoScreen({ navigation, route }) {
 
   const onShare = async () => {
     const msg =
-`🎉 *${evento.nombre}* (${evento.tipo})
+      `🎉 *${evento.nombre}* (${evento.tipo})
 📅 ${evento.fecha}  ⏰ ${evento.hora}
 📍 ${evento.ubicacion || 'Sin dirección'}
 
@@ -72,7 +73,7 @@ export default function DetalleEventoScreen({ navigation, route }) {
         {hasCoords && (
           <View style={styles.mapWrap}>
             <MapView
-              style={{ flex:1 }}
+              style={{ flex: 1 }}
               initialRegion={{
                 latitude: evento.lat,
                 longitude: evento.lng,
@@ -88,6 +89,7 @@ export default function DetalleEventoScreen({ navigation, route }) {
       </View>
 
       <View style={styles.actions}>
+
         <TouchableOpacity style={[styles.btn, styles.edit]} onPress={() => navigation.navigate('EditarEvento', { id: evento.id })}>
           <MaterialIcons name="edit" size={20} color={colors.white} />
           <Text style={styles.btnText}>Editar</Text>
@@ -103,26 +105,47 @@ export default function DetalleEventoScreen({ navigation, route }) {
           <Text style={styles.btnText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.actions}> {/* Reutilizamos styles.actions para la fila y el margen */}
+        <TouchableOpacity
+          style={[styles.btn, styles.uploadBtn]}
+          onPress={() => Alert.alert('Fotos', 'Aquí se suben fotos')}
+        >
+          <MaterialIcons name="cloud-upload" size={20} color={colors.warn} />
+          <Text style={styles.btnTxt}>Subir Fotos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.btn, styles.viewGalleryBtn]}
+          onPress={() => Alert.alert('Galería', 'Aquí se ve la galería')}
+        >
+          <MaterialIcons name="photo-library" size={20} color={colors.warn} />
+
+          <Text style={styles.btnTxt}>Ver Galería</Text>
+        </TouchableOpacity>
+      </View>
     </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
   header: { paddingTop: 60, paddingHorizontal: 16, paddingBottom: 12 },
-  backBtn: { width: 40, height: 40, borderRadius: 20, alignItems:'center', justifyContent:'center', backgroundColor:'rgba(255,255,255,0.2)' },
-  headerTitle: { color:'#fff', fontSize:22, fontWeight:'800', marginTop:12 },
-  headerSub: { color:'#fff', opacity:0.9 },
+  backBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)' },
+  headerTitle: { color: '#fff', fontSize: 22, fontWeight: '800', marginTop: 12 },
+  headerSub: { color: '#fff', opacity: 0.9 },
 
-  card: { backgroundColor:'#fff', margin:16, borderRadius:16, padding:16 },
-  title: { fontSize:18, fontWeight:'800', color:colors.primary, marginBottom:6 },
-  line: { color:'#222', marginTop:4 },
-  desc: { color:'#666', marginTop:10 },
-  mapWrap: { height:180, borderRadius:12, overflow:'hidden', marginTop:12 },
-
-  actions: { flexDirection:'row', gap:10, marginHorizontal:16 },
-  btn: { flex:1, height:48, borderRadius:12, alignItems:'center', justifyContent:'center', flexDirection:'row', gap:8 },
-  btnText: { color:'#fff', fontWeight:'800' },
+  card: { backgroundColor: '#fff', margin: 16, borderRadius: 16, padding: 16 },
+  title: { fontSize: 18, fontWeight: '800', color: colors.primary, marginBottom: 6 },
+  line: { color: '#222', marginTop: 4 },
+  desc: { color: '#666', marginTop: 10 },
+  mapWrap: { height: 180, borderRadius: 12, overflow: 'hidden', marginTop: 12 },
+  btnTxt: { color: '#000000ff', fontWeight: '800' },
+  actions: { flexDirection: 'row', gap: 10, marginHorizontal: 16,marginBottom: 10},
+  btn: { flex: 1, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
+  btnText: { color: '#fff', fontWeight: '800' },
   edit: { backgroundColor: colors.primary },
   share: { backgroundColor: '#2b8a3e' },
   delete: { backgroundColor: '#d0003a' },
+  uploadBtn: { backgroundColor: '#ffffffff' }, // Verde cian para subir
+  viewGalleryBtn: { backgroundColor: '#ffffffff' }, // Azul para ver
+  
 });

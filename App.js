@@ -7,6 +7,7 @@ import AuthProviderLocal, { useAuth } from './src/providers/AuthProviderLocal';
 
 // Auth
 import LoginScreen from './src/screens/Auth/LoginScreen';
+import RegisterScreen from './src/screens/Auth/RegisterScreen';
 // (Opcional) Una RegisterScreen que diga “registro deshabilitado”.
 
 // App
@@ -22,6 +23,7 @@ function AuthStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen}/>
     </Stack.Navigator>
   );
 }
