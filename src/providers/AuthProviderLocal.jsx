@@ -22,11 +22,12 @@ export default function AuthProviderLocal({ children }) {
   }, []);
 
   async function signIn(email, password) {
-    const found = USERS.find(
-      u => u.email.toLowerCase() === email.trim().toLowerCase() && u.password === password
-    );
+    var found = true;
+    if (email.trim() === "" && password.trim() === "") {
+      found = false
+    } 
     if (!found) {
-      const err = new Error('Credenciales inválidas');
+      const err = new Error('Los campos no pueden estar vacios');
       err.code = 'INVALID_CREDENTIALS';
       throw err;
     }

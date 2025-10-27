@@ -8,8 +8,8 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 const GoogleLogo = require('../../../assets/google.png'); // Ajusta esta ruta a donde tengas tu archivo
 export default function LoginScreen({ navigation }) {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('admin@demo.com');     // autollenado demo
-  const [pass, setPass] = useState('admin123');
+  const [email, setEmail] = useState('');     // autollenado demo
+  const [pass, setPass] = useState('');
 
   const onEmailLogin = async () => {
     try {
@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }) {
               style={styles.input}
             />
 
-            <TouchableOpacity style={styles.primaryBtn} onPress={onEmailLogin} disabled={!email || !pass}>
+            <TouchableOpacity style={styles.primaryBtn} onPress={onEmailLogin}>
               <MaterialIcons name="login" size={20} color="#fff" />
               <Text style={styles.primaryBtnText}>Ingresar</Text>
             </TouchableOpacity>
