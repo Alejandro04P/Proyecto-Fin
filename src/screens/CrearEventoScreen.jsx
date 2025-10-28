@@ -10,6 +10,7 @@ import { addEvento, getEventos } from '../lib/storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import MapPicker from '../components/MapPicker';
 import { Picker } from '@react-native-picker/picker';
+import TimeScrollPicker from '../components/TimeScrollPicker'; // ⏰ rueda vertical
 
 const COLOR_OPTIONS = ['#6a11cb', '#ff6b6b', '#4ecdc4', '#ffd166', '#00b09b'];
 const TIPO_OPTIONS = [
@@ -21,13 +22,14 @@ export default function CrearEventoScreen({ navigation }) {
   // Campos
   const [nombre, setNombre] = useState('');
   const [tipo, setTipo] = useState(''); // seleccionado del Picker
+  const [otroTipo, setOtroTipo] = useState(''); // cuando eligen "Otro"
   const [descripcion, setDescripcion] = useState('');
 
   // Fecha & Hora
   const [fecha, setFecha] = useState(null);
   const [hora, setHora] = useState(null);
   const [showDate, setShowDate] = useState(false);
-  const [showTime, setShowTime] = useState(false);
+  const [showTime, setShowTime] = useState(false); // abre la rueda
 
   // Ubicación
   const [address, setAddress] = useState('');
@@ -40,9 +42,15 @@ export default function CrearEventoScreen({ navigation }) {
   // Errores por campo
   const [errors, setErrors] = useState({});
 
-  // Helpers
-  const fmtDate = (d) => (!d ? '' : d.toISOString().slice(0, 10)); // YYYY-MM-DD
-  const fmtTime = (d) => (!d ? '' : d.toTimeString().slice(0, 5));   // HH:MM
+  // -------- Helpers (local time) --------
+  const fmtDate = (d) => {
+    if (!d) return '';
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`; // YYYY-MM-DD
+  };
+  const fmtTime = (d) => (!d ? '' : `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`);
 
   const todayMidnight = () => {
     const t = new Date();
@@ -54,48 +62,32 @@ export default function CrearEventoScreen({ navigation }) {
     const e = {};
 
     // Nombre
-    if (!nombre || nombre.trim().length < 3) {
-      e.nombre = 'El nombre debe tener al menos 3 caracteres.';
-    }
+    if (!nombre || nombre.trim().length < 3) e.nombre = 'El nombre debe tener al menos 3 caracteres.';
 
     // Tipo
-    if (!tipo) {
-      e.tipo = 'Selecciona un tipo de evento.';
-    } else if (!TIPO_OPTIONS.includes(tipo)) {
-      e.tipo = 'Tipo inválido.';
-    }
+    if (!tipo) e.tipo = 'Selecciona un tipo de evento.';
+    else if (!TIPO_OPTIONS.includes(tipo)) e.tipo = 'Tipo inválido.';
+    else if (tipo === 'Otro' && (!otroTipo || otroTipo.trim().length < 3)) e.otroTipo = 'Escribe el tipo de evento.';
 
     // Descripción
-    if (descripcion?.length > 300) {
-      e.descripcion = 'La descripción no puede superar los 300 caracteres.';
-    }
+    if (descripcion?.length > 300) e.descripcion = 'La descripción no puede superar los 300 caracteres.';
 
     // Fecha
-    if (!fecha) {
-      e.fecha = 'Selecciona una fecha.';
-    } else if (fecha < todayMidnight()) {
-      e.fecha = 'La fecha no puede ser anterior a hoy.';
-    }
+    if (!fecha) e.fecha = 'Selecciona una fecha.';
+    else if (fecha < todayMidnight()) e.fecha = 'La fecha no puede ser anterior a hoy.';
 
     // Hora
-    if (!hora) {
-      e.hora = 'Selecciona una hora.';
-    } else if (fecha && fmtDate(fecha) === fmtDate(new Date())) {
-      // Si el evento es hoy, la hora debe ser futura
+    if (!hora) e.hora = 'Selecciona una hora.';
+    else if (fecha && fmtDate(fecha) === fmtDate(new Date())) {
       const now = new Date();
-      // compón una fecha con la hora seleccionada
       const withTime = new Date();
       withTime.setHours(hora.getHours(), hora.getMinutes(), 0, 0);
       if (withTime <= now) e.hora = 'La hora debe ser posterior a la actual.';
     }
 
     // Ubicación
-    if (!address?.trim()) {
-      e.address = 'Ingresa una dirección o usa el mapa.';
-    }
-    if (!coords?.latitude || !coords?.longitude) {
-      e.coords = 'Selecciona un punto en el mapa o usa tu ubicación.';
-    }
+    if (!address?.trim()) e.address = 'Ingresa una dirección o usa el mapa.';
+    if (!coords?.latitude || !coords?.longitude) e.coords = 'Selecciona un punto en el mapa o usa tu ubicación.';
 
     // Duplicados (nombre + fecha)
     if (!e.nombre && !e.fecha) {
@@ -113,37 +105,39 @@ export default function CrearEventoScreen({ navigation }) {
   const isFormBasicOK = useMemo(() =>
     nombre?.trim().length >= 3 &&
     !!tipo &&
+    (tipo !== 'Otro' ? true : otroTipo.trim().length >= 3) &&
     !!fecha &&
     !!hora &&
     !!address?.trim() &&
     !!coords?.latitude &&
     !!coords?.longitude,
-    [nombre, tipo, fecha, hora, address, coords]
+    [nombre, tipo, otroTipo, fecha, hora, address, coords]
   );
 
   const onPickDate = (_, selected) => {
     setShowDate(false);
-    if (selected) setFecha(selected);
-  };
-
-  const onPickTime = (_, selected) => {
-    setShowTime(false);
-    if (selected) setHora(selected);
+    if (selected) {
+      const local = new Date(selected);
+      local.setHours(12, 0, 0, 0); // evita que se corra un día
+      setFecha(local);
+      if (errors.fecha) setErrors({ ...errors, fecha: undefined });
+    }
   };
 
   async function onCrear() {
     const ok = await validateAll();
     if (!ok) {
-      // muestra el primer error relevante
-      const first = errors.nombre || errors.tipo || errors.descripcion ||
+      const first = errors.nombre || errors.tipo || errors.otroTipo || errors.descripcion ||
         errors.fecha || errors.hora || errors.address || errors.coords || errors.dup;
       if (first) Alert.alert('Revisa los datos', first);
       return;
     }
 
+    const tipoFinal = tipo === 'Otro' ? otroTipo.trim() : tipo;
+
     const payload = {
       nombre: nombre.trim(),
-      tipo,
+      tipo: tipoFinal,
       descripcion: descripcion?.trim() ?? '',
       fecha: fmtDate(fecha),
       hora: fmtTime(hora),
@@ -187,17 +181,37 @@ export default function CrearEventoScreen({ navigation }) {
           {/* Picker de TIPO */}
           <View style={[styles.pickerBox, errors.tipo && styles.inputError]}>
             <MaterialIcons name="category" size={18} color={colors.primary} />
-            <Picker
-              selectedValue={tipo}
-              onValueChange={(v) => { setTipo(v); if (errors.tipo) setErrors({ ...errors, tipo: undefined }); }}
-              style={{ flex: 1 }}
-              dropdownIconColor={colors.primary}
-            >
-              <Picker.Item label="Selecciona un tipo..." value="" />
-              {TIPO_OPTIONS.map(t => <Picker.Item key={t} label={t} value={t} />)}
-            </Picker>
+            <View style={{ flex: 1 }}>
+              <Picker
+                selectedValue={tipo}
+                onValueChange={(v) => {
+                  setTipo(v);
+                  if (v !== 'Otro') setOtroTipo('');
+                  if (errors.tipo) setErrors({ ...errors, tipo: undefined });
+                }}
+                style={{ flex: 1 }}
+                dropdownIconColor={colors.primary}
+              >
+                <Picker.Item label="Selecciona un tipo..." value="" />
+                {TIPO_OPTIONS.map(t => <Picker.Item key={t} label={t} value={t} />)}
+              </Picker>
+            </View>
           </View>
           {errors.tipo && <Text style={styles.err}>{errors.tipo}</Text>}
+
+          {/* Campo libre cuando es "Otro" */}
+          {tipo === 'Otro' && (
+            <>
+              <TextInput
+                placeholder="Escribe el tipo de evento"
+                placeholderTextColor="#999"
+                value={otroTipo}
+                onChangeText={(t) => { setOtroTipo(t); if (errors.otroTipo) setErrors({ ...errors, otroTipo: undefined }); }}
+                style={[styles.input, errors.otroTipo && styles.inputError]}
+              />
+              {errors.otroTipo && <Text style={styles.err}>{errors.otroTipo}</Text>}
+            </>
+          )}
 
           <TextInput
             placeholder="Descripción (máx. 300)"
@@ -217,13 +231,18 @@ export default function CrearEventoScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Fecha y Hora</Text>
 
-
-          <TouchableOpacity style={[styles.input, styles.btnField, errors.fecha && styles.inputError]} onPress={() => setShowDate(true)}>
+          <TouchableOpacity
+            style={[styles.input, styles.btnField, errors.fecha && styles.inputError]}
+            onPress={() => setShowDate(true)}
+          >
             <MaterialIcons name="calendar-today" size={18} color={colors.primary} />
             <Text style={styles.btnFieldText}>{fmtDate(fecha) || 'Seleccionar fecha'}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.input, styles.btnField, errors.hora && styles.inputError]} onPress={() => setShowTime(true)}>
+          <TouchableOpacity
+            style={[styles.input, styles.btnField, errors.hora && styles.inputError]}
+            onPress={() => setShowTime(true)} // abre la rueda
+          >
             <MaterialIcons name="schedule" size={18} color={colors.primary} />
             <Text style={styles.btnFieldText}>{fmtTime(hora) || 'Seleccionar hora'}</Text>
           </TouchableOpacity>
@@ -237,17 +256,21 @@ export default function CrearEventoScreen({ navigation }) {
               mode="date"
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={onPickDate}
+              minimumDate={todayMidnight()} // 🔒 bloquea días previos
             />
           )}
-          {showTime && (
-            <DateTimePicker
-              value={hora || new Date()}
-              mode="time"
-              is24Hour
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onPickTime}
-            />
-          )}
+
+          {/* ⏰ Rueda de hora */}
+          <TimeScrollPicker
+            visible={showTime}
+            initialDate={hora || new Date()}
+            onCancel={() => setShowTime(false)}
+            onConfirm={(d) => {
+              setHora(d);
+              if (errors.hora) setErrors({ ...errors, hora: undefined });
+              setShowTime(false);
+            }}
+          />
         </View>
 
         {/* Ubicación */}
@@ -272,19 +295,6 @@ export default function CrearEventoScreen({ navigation }) {
           />
           {errors.coords && <Text style={[styles.err, { marginTop: 6 }]}>{errors.coords}</Text>}
         </View>
-
-        {/* Diseño 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Diseño</Text>
-         <Text style={styles.label}>Color principal</Text>
-          <View style={styles.colorsRow}>
-            {COLOR_OPTIONS.map(c => (
-              <TouchableOpacity key={c} onPress={() => setColor(c)} style={[styles.colorDot, { backgroundColor: c, borderWidth: color === c ? 3 : 0 }]} />
-            ))}
-          </View>
-        </View>
-        */}
-        
 
         {/* Preview */}
         <View style={styles.preview}>
@@ -325,8 +335,7 @@ const styles = StyleSheet.create({
   inputError: { borderWidth: 1.5, borderColor: '#f66' },
   err: { color: '#b00020', fontSize: 12, marginBottom: 6 },
 
- 
-  btnField: {flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#eef0ff' },
+  btnField: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#eef0ff' },
   btnFieldText: { color: colors.textDark, fontWeight: '600' },
 
   pickerBox: {
