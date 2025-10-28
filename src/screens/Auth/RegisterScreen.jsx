@@ -37,29 +37,20 @@ export default function RegisterScreen({ navigation }) {
   const [pass2, setPass2] = useState('');
 
   const onRegister = async () => {
-    if (!name.trim() || !lastName.trim() || !phone.trim() || !email.trim() || !pass || !pass2) {
+    if (name.trim() === "" ||
+      lastName.trim() === "" ||
+      phone.trim() === "" ||
+      email.trim() === "" ||
+      pass === "" ||
+      pass2 === "") {
       Toast.show({
         type: 'error',
         text1: 'Faltan campos',
         text2: 'Por favor, rellena todos los campos obligatorios para continuar.'
       });
-      return; // Detiene la ejecución de la función si falta algún dato
+      return; // Detiene la ejecución
     }
     // 🛑 2. VALIDACIÓN DE FORMATO DE CORREO (Añadido)
-    if (!isValidPhone(phone)) {
-      Toast.show({
-        type: 'error',
-        text1: 'Teléfono inválido',
-        text2: 'El número de teléfono debe contener solo dígitos y al menos 7 caracteres.'
-      });
-      return;
-    }
-    // Validación de Formato de Correo
-    if (!isValidEmail(email)) {
-      Toast.show({ type: 'error', text1: 'Correo inválido', text2: 'Ingresa un correo con formato correcto (ej: usuario@dominio.com).' });
-      return;
-    }
-
     if (!isValidName(name)) {
       Toast.show({
         type: 'error',
@@ -68,21 +59,40 @@ export default function RegisterScreen({ navigation }) {
       });
       return;
     }
+
+    // 3. ✅ VALIDACIÓN DE FORMATO: APELLIDO (¡Asegúrate de que el Toast diga 'Apellido'!)
     if (!isValidName(lastName)) {
       Toast.show({
         type: 'error',
-        text1: 'Nombre inválido',
-        text2: 'El nombre solo debe contener letras.'
+        text1: 'Apellido inválido', // 👈 CORRECCIÓN: Usar Apellido
+        text2: 'El apellido solo debe contener letras.' // 👈 CORRECCIÓN: Usar Apellido
       });
       return;
     }
-    // 🛑 3. VALIDACIÓN DE LARGO DE CONTRASEÑA (Existente)
-    if (pass.length < 6) {
-      Toast.show({ type: 'error', text1: 'La contraseña debe tener 6+ caracteres' });
+
+    // 4. ✅ VALIDACIÓN DE FORMATO: TELÉFONO
+    if (!isValidPhone(phone)) {
+      Toast.show({
+        type: 'error',
+        text1: 'Teléfono inválido',
+        text2: 'El número de teléfono debe contener solo dígitos y al menos 7 caracteres.'
+      });
       return;
     }
 
-    // 🛑 4. VALIDACIÓN DE COINCIDENCIA DE CONTRASEÑAS (Existente)
+    // 5. ✅ VALIDACIÓN DE FORMATO: CORREO
+    if (!isValidEmail(email)) {
+      Toast.show({ type: 'error', text1: 'Correo inválido', text2: 'Ingresa un correo con formato correcto.' });
+      return;
+    }
+
+    // 6. ✅ VALIDACIÓN DE SEGURIDAD: LARGO DE CONTRASEÑA
+    if (pass.length < 6) {
+      Toast.show({ type: 'error', text1: 'Contraseña débil', text2: 'La contraseña debe tener 6+ caracteres' });
+      return;
+    }
+
+    // 7. ✅ VALIDACIÓN DE SEGURIDAD: COINCIDENCIA DE CONTRASEÑAS
     if (pass !== pass2) {
       Toast.show({ type: 'error', text1: 'Las contraseñas no coinciden' });
       return;
@@ -177,7 +187,7 @@ export default function RegisterScreen({ navigation }) {
               />
 
 
-              <TouchableOpacity style={styles.primaryBtn} onPress={onRegister} disabled={!email || !pass || !pass2}>
+              <TouchableOpacity style={styles.primaryBtn} onPress={onRegister}>
                 <MaterialIcons name="person-add" size={20} color="#fff" />
                 <Text style={styles.primaryBtnText}>Crear cuenta</Text>
               </TouchableOpacity>

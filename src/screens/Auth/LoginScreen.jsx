@@ -22,11 +22,18 @@ export default function LoginScreen({ navigation }) {
   const [googlePass, setGooglePass] = useState('');
   const onEmailLogin = async () => {
     try {
+      
+      if (email.trim() === "" || password.trim() === "") {
+        const err = new Error('Los campos no pueden estar vacíos.');
+        err.code = 'INVALID_CREDENTIALS';
+        throw err;
+      }
+    
       if (!isValidEmail(email)) {
         Toast.show({
           type: 'error',
           text1: 'Formato de correo inválido',
-          text2: 'Por favor, ingresa un correo con formato correcto (ej: usuario@dominio.com).'
+          text2: 'Por favor, ingresa un correo con formato correcto'
         });
         return;
       }
@@ -39,11 +46,18 @@ export default function LoginScreen({ navigation }) {
 
   const onGoogleModalLogin = async () => {
     try {// 1. VALIDACIÓN: Usamos el estado del modal (googleEmail)
+
+       if (googleEmail.trim() === "" || googlePass.trim() === "") {
+        const err = new Error('Los campos no pueden estar vacíos.');
+        err.code = 'INVALID_CREDENTIALS';
+        throw err;
+      }
+    
       if (!isValidEmail(googleEmail)) {
         Toast.show({
           type: 'error',
           text1: 'Formato de correo inválido',
-          text2: 'Por favor, ingresa un correo con formato correcto (ej: usuario@dominio.com).'
+          text2: 'Por favor, ingresa un correo con formato correcto'
         });
         return; // Detiene la función si el email es inválido.
       }
