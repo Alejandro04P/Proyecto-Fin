@@ -102,7 +102,7 @@ export default function RegisterScreen({ navigation }) {
       // 🛑 Llama a signUp con TODOS los datos si tu AuthProvider lo requiere
       //await signUp(email.trim(), pass);
       Toast.show({ type: 'success', text1: 'Cuenta creada' });
-      navigation.replace('Login');
+      navigation.replace('Home');
       // 🛑 Redirección al Home/Dashboard
       // Lo más lógico es redirigir al usuario directamente a la aplicación principal (Dashboard) 
       // después de un registro exitoso, ya que la sesión está guardada.

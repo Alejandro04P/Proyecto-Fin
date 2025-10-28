@@ -23,11 +23,18 @@ export default function LoginScreen({ navigation }) {
   const onEmailLogin = async () => {
     try {
       
-      if (email.trim() === "" || password.trim() === "") {
-        const err = new Error('Los campos no pueden estar vacíos.');
-        err.code = 'INVALID_CREDENTIALS';
-        throw err;
-      }
+     try {
+            // ... (tu lógica de validación) ...
+            if (email.trim() === "" || password.trim() === "") {
+                const err = new Error('Los campos no pueden estar vacíos.');
+                err.code = 'INVALID_CREDENTIALS';
+                throw err;
+            }
+            // ... (el resto de tu lógica de signin) ...
+        } catch (err) {
+            // ... (Toast de error interno)
+            throw err; // Re-lanza el error para que lo capture el catch externo
+        }
     
       if (!isValidEmail(email)) {
         Toast.show({
