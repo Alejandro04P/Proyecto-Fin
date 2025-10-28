@@ -16,6 +16,7 @@ import GestionEventosScreen from './src/screens/GestionEventosScreen';
 import CrearEventoScreen from './src/screens/CrearEventoScreen';
 import DetalleEventoScreen from './src/screens/DetalleEventoScreen';
 import EditarEventoScreen from './src/screens/EditarEventoScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,7 @@ function AppStack() {
       <Stack.Screen name="CrearEvento" component={CrearEventoScreen} />
       <Stack.Screen name="Detalle" component={DetalleEventoScreen} />
       <Stack.Screen name="EditarEvento" component={EditarEventoScreen} />
+      <Stack.Screen name="Perfil" component={ProfileScreen} options={{ headerShown: true, title: 'Mi Perfil' }} />
     </Stack.Navigator>
   );
 }

@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import GradientBackground from '../components/GradientBackground';
 import { colors } from '../theme/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../providers/AuthProviderLocal';
+import ProfileMenu from '../components/ProfileMenu';
 
 export default function HomeScreen({ navigation }) {
   const { user, signOut } = useAuth();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const avatarRef = useRef(null);
+  const [anchor, setAnchor] = useState({ x: 16, y: 80, width: 40, height: 40 });
 
   const onSignOut = () => {
     Alert.alert('Cerrar sesión', '¿Deseas salir de tu cuenta?', [
@@ -18,14 +22,32 @@ export default function HomeScreen({ navigation }) {
   // Inicial para “avatar” textual
   const initial = (user?.name || user?.email || 'U')[0]?.toUpperCase?.() || 'U';
 
+  const openProfileMenu = () => {
+    if (avatarRef.current?.measureInWindow) {
+      avatarRef.current.measureInWindow((x, y, width, height) => {
+        setAnchor({ x: x + width, y, width, height });
+        setTimeout(() => setMenuVisible(true), 0);
+      });
+    } else {
+      setMenuVisible(true);
+    }
+  };
+
   return (
     <GradientBackground>
       {/* Header con perfil y cerrar sesión */}
       <View style={styles.header}>
         <View style={styles.userBox}>
-          <View style={styles.avatar}>
+          <TouchableOpacity
+            ref={avatarRef}
+            onPress={openProfileMenu}
+            activeOpacity={0.85}
+            style={styles.avatar}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir menú de perfil"
+          >
             <Text style={styles.avatarText}>{initial}</Text>
-          </View>
+          </TouchableOpacity>
           <View style={{ marginLeft: 10 }}>
             <Text style={styles.hello}>Hola,</Text>
             <Text style={styles.username} numberOfLines={1}>
@@ -33,9 +55,8 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity onPress={onSignOut} style={styles.signoutBtn} accessibilityLabel="Cerrar sesión">
-          <MaterialIcons name="logout" size={18} color="#fff" />
-          <Text style={styles.signoutText}>Salir</Text>
+        <TouchableOpacity onPress={openProfileMenu} style={styles.signoutBtn} accessibilityLabel="Abrir menú de perfil">
+          <MaterialIcons name="more-vert" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -93,6 +114,13 @@ export default function HomeScreen({ navigation }) {
       >
         <MaterialIcons name="add" size={28} color="#fff" />
       </TouchableOpacity>
+      <ProfileMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        anchor={anchor}
+        onOpenProfile={() => navigation.navigate('Perfil')}
+        onSignOut={onSignOut}
+      />
     </GradientBackground>
   );
 }
@@ -103,7 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'
   },
   userBox: { flexDirection: 'row', alignItems: 'center', maxWidth: '70%' },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },
   avatarText: { color: '#fff', fontWeight: '800' },
   hello: { color: '#fff', opacity: 0.9, fontSize: 12 },
   username: { color: '#fff', fontWeight: '800', fontSize: 16, maxWidth: 200 },
