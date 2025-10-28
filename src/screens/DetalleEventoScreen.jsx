@@ -7,6 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { deleteEvento, getEventoById } from '../lib/storage';
 
+
 export default function DetalleEventoScreen({ navigation, route }) {
   const { id } = route.params;
   const [evento, setEvento] = useState(null);
@@ -122,6 +123,14 @@ export default function DetalleEventoScreen({ navigation, route }) {
 
           <Text style={styles.btnTxt}>Ver Galería</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+        style={[styles.btn, styles.chatBtn]} // <--- Nuevo estilo
+        onPress={() => navigation.navigate('Chat', { eventId: evento.id, eventName: evento.nombre })} // <--- Navegación al Chat
+>
+        <MaterialIcons name="chat" size={20} color={colors.primary} />
+        <Text style={styles.btnTxt}>Chat Evento</Text>
+        </TouchableOpacity>
       </View>
     </GradientBackground>
   );
@@ -148,4 +157,7 @@ const styles = StyleSheet.create({
   uploadBtn: { backgroundColor: '#ffffffff' }, // Verde cian para subir
   viewGalleryBtn: { backgroundColor: '#ffffffff' }, // Azul para ver
   
+
+  //Estilo para la seccion de chat
+chatBtn: { backgroundColor: colors.white },
 });
