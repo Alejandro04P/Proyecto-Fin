@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation }) {
       
      try {
             // ... (tu lógica de validación) ...
-            if (email.trim() === "" || password.trim() === "") {
+            if (email.trim() === "" || pass.trim() === "") {
                 const err = new Error('Los campos no pueden estar vacíos.');
                 err.code = 'INVALID_CREDENTIALS';
                 throw err;
