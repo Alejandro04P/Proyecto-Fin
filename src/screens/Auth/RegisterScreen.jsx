@@ -1,6 +1,6 @@
 // src/screens/Auth/RegisterScreen.jsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Image, ScrollView, Modal } from 'react-native';
 import GradientBackground from '../../components/GradientBackground';
 import { colors } from '../../theme/colors';
 import { useAuth } from '../../providers/AuthProviderLocal';
@@ -28,13 +28,16 @@ const isValidName = (text) => {
   return nameRegex.test(text.trim());
 };
 export default function RegisterScreen({ navigation }) {
-  const { signUp } = useAuth(); // Obtén la función directamente
+  const { signIn } = useAuth();
   const [name, setName] = useState('');      // Nuevo estado
   const [lastName, setLastName] = useState('');  // Nuevo estado
   const [phone, setPhone] = useState('');      // Nuevo estado
   const [email, setEmail] = useState('');     // Estado existente para Correo
   const [pass, setPass] = useState('');
   const [pass2, setPass2] = useState('');
+  const [isGoogleModalVisible, setIsGoogleModalVisible] = useState(false); // <-- Nuevo estado para el modal
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googlePass, setGooglePass] = useState('');
 
   const onRegister = async () => {
     if (name.trim() === "" ||
@@ -101,8 +104,8 @@ export default function RegisterScreen({ navigation }) {
     try {
       // 🛑 Llama a signUp con TODOS los datos si tu AuthProvider lo requiere
       //await signUp(email.trim(), pass);
+      await signIn(email, pass);
       Toast.show({ type: 'success', text1: 'Cuenta creada' });
-      navigation.replace('Home');
       // 🛑 Redirección al Home/Dashboard
       // Lo más lógico es redirigir al usuario directamente a la aplicación principal (Dashboard) 
       // después de un registro exitoso, ya que la sesión está guardada.
@@ -112,6 +115,32 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
+  const onGoogleModalLogin = async () => {
+    try {// 1. VALIDACIÓN: Usamos el estado del modal (googleEmail)
+
+      if (googleEmail.trim() === "" || googlePass.trim() === "") {
+        const err = new Error('Los campos no pueden estar vacíos.');
+        err.code = 'INVALID_CREDENTIALS';
+        throw err;
+      }
+
+      if (!isValidEmail(googleEmail)) {
+        Toast.show({
+          type: 'error',
+          text1: 'Formato de correo inválido',
+          text2: 'Por favor, ingresa un correo con formato correcto'
+        });
+        return; // Detiene la función si el email es inválido.
+      }
+
+      await signIn(googleEmail, googlePass);
+      setIsGoogleModalVisible(false); // Cierra el modal
+      Toast.show({ type: 'success', text1: 'Bienvenido' });
+    }
+    catch (e) {
+      Toast.show({ type: 'error', text1: 'No pudimos iniciar sesión', text2: e.message });
+    }
+  };
   return (
     <GradientBackground>
       <KeyboardAvoidingView
@@ -129,8 +158,11 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.card}>
               <TouchableOpacity
                 style={styles.googleBtn}
-                onPress={() => alert('Entrar con Google (Demo)')}
-              >
+                onPress={() => {
+                  setIsGoogleModalVisible(true)
+                  setGoogleEmail("");
+                  setGooglePass("");
+                }} >
                 {/* 👇 Reemplazamos el ícono por la imagen importada */}
                 <Image source={GoogleLogo} style={styles.googleIcon} />
                 <Text style={styles.googleBtnText}>Entrar con Google</Text>
@@ -199,6 +231,61 @@ export default function RegisterScreen({ navigation }) {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={isGoogleModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsGoogleModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.googleModal}>
+            <View style={styles.googleHeader}>
+              <Image source={GoogleLogo} style={styles.googleModalLogo} />
+              <Text style={styles.googleModalTitle}>Iniciar sesión</Text>
+              <Text style={styles.googleModalSub}>Para continuar con EventMaster</Text>
+            </View>
+
+            <TextInput
+              placeholder="Correo electrónico"
+              placeholderTextColor="#888"
+              // 👇 USAR ESTADO DEL MODAL
+              value={googleEmail}
+              onChangeText={setGoogleEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              style={styles.modalInput}
+            />
+            <TextInput
+              placeholder="Contraseña"
+              placeholderTextColor="#888"
+              // 👇 USAR ESTADO DEL MODAL
+              value={googlePass}
+              onChangeText={setGooglePass}
+              secureTextEntry
+              style={styles.modalInput}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsGoogleModalVisible(false);
+                  setGoogleEmail("");
+                  setGooglePass("");
+                }}
+              >
+                <Text style={styles.modalLink}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalPrimaryBtn}
+                onPress={onGoogleModalLogin}
+              >
+                <Text style={styles.modalPrimaryBtnText}>Siguiente</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Toast />
+        </View>
+      </Modal>
     </GradientBackground>
   );
 }
@@ -265,5 +352,75 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     // Asegúrate de que no tenga flex: 1 aquí
+  },// --- ESTILOS DEL MODAL DE GOOGLE ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  googleModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  googleHeader: {
+    alignItems: 'flex-start',
+    marginBottom: 20,
+  },
+  googleModalLogo: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+    marginBottom: 10,
+  },
+  googleModalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1f1f1f',
+  },
+  googleModalSub: {
+    color: '#5f6368',
+    fontSize: 14,
+    marginTop: 4,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#dadce0',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
+    color: '#222',
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 10,
+    gap: 20,
+  },
+  modalLink: {
+    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  modalPrimaryBtn: {
+    backgroundColor: colors.primary, // O puedes usar un azul de Google: '#1a73e8'
+    borderRadius: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  modalPrimaryBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
