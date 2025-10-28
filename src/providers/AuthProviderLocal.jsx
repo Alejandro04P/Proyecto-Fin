@@ -39,9 +39,6 @@ export default function AuthProviderLocal({ children }) {
         email: email,
         isSimpleLogin: true,
     };
-
-    // 🛑 CLAVE: Guardar el objeto simple en AsyncStorage
-    await AsyncStorage.setItem(KEY, JSON.stringify(userToStore));
     
     // 🛑 CLAVE: Establecer el estado con el objeto
     setUser(userToStore); 
