@@ -22,10 +22,10 @@ const isValidPhone = (phone) => {
 };
 
 const isValidName = (text) => {
-    // Regex: ^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$
-    // Permite letras (mayúsculas/minúsculas), letras acentuadas, la ñ, espacios, guiones y apóstrofos.
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/;
-    return nameRegex.test(text.trim());
+  // Regex: ^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$
+  // Permite letras (mayúsculas/minúsculas), letras acentuadas, la ñ, espacios, guiones y apóstrofos.
+  const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/;
+  return nameRegex.test(text.trim());
 };
 export default function RegisterScreen({ navigation }) {
   const { signUp } = useAuth(); // Obtén la función directamente
@@ -37,7 +37,14 @@ export default function RegisterScreen({ navigation }) {
   const [pass2, setPass2] = useState('');
 
   const onRegister = async () => {
-
+    if (!name.trim() || !lastName.trim() || !phone.trim() || !email.trim() || !pass || !pass2) {
+      Toast.show({
+        type: 'error',
+        text1: 'Faltan campos',
+        text2: 'Por favor, rellena todos los campos obligatorios para continuar.'
+      });
+      return; // Detiene la ejecución de la función si falta algún dato
+    }
     // 🛑 2. VALIDACIÓN DE FORMATO DE CORREO (Añadido)
     if (!isValidPhone(phone)) {
       Toast.show({
@@ -54,20 +61,20 @@ export default function RegisterScreen({ navigation }) {
     }
 
     if (!isValidName(name)) {
-        Toast.show({ 
-            type: 'error', 
-            text1: 'Nombre inválido', 
-            text2: 'El nombre solo debe contener letras.' 
-        });
-        return;
+      Toast.show({
+        type: 'error',
+        text1: 'Nombre inválido',
+        text2: 'El nombre solo debe contener letras.'
+      });
+      return;
     }
     if (!isValidName(lastName)) {
-        Toast.show({ 
-            type: 'error', 
-            text1: 'Nombre inválido', 
-            text2: 'El nombre solo debe contener letras.' 
-        });
-        return;
+      Toast.show({
+        type: 'error',
+        text1: 'Nombre inválido',
+        text2: 'El nombre solo debe contener letras.'
+      });
+      return;
     }
     // 🛑 3. VALIDACIÓN DE LARGO DE CONTRASEÑA (Existente)
     if (pass.length < 6) {
