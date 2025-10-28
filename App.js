@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Toast from 'react-native-toast-message';
-
+import ChatScreen from './src/screens/ChatScreen';
 import AuthProviderLocal, { useAuth } from './src/providers/AuthProviderLocal';
 
 // Auth
@@ -38,6 +38,7 @@ function AppStack() {
       <Stack.Screen name="Detalle" component={DetalleEventoScreen} />
       <Stack.Screen name="EditarEvento" component={EditarEventoScreen} />
       <Stack.Screen name="Perfil" component={ProfileScreen} options={{ headerShown: true, title: 'Mi Perfil' }} />
+      <Stack.Screen name="Chat" component={ChatScreen} />
     </Stack.Navigator>
   );
 }

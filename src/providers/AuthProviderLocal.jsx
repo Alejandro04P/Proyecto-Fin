@@ -22,19 +22,32 @@ export default function AuthProviderLocal({ children }) {
   }, []);
 
   async function signIn(email, password) {
-    var found = true;
-    if (email.trim() === "" && password.trim() === "") {
-      found = false
-    } 
-    if (!found) {
-      const err = new Error('Los campos no pueden estar vacios');
-      err.code = 'INVALID_CREDENTIALS';
-      throw err;
+    // 1. **VALIDACIÓN SIMPLE (Solo campos vacíos)**
+    if (email.trim() === "" || password.trim() === "") {
+        const err = new Error('Los campos no pueden estar vacíos.');
+        err.code = 'INVALID_CREDENTIALS';
+        throw err;
     }
-    await AsyncStorage.setItem(KEY, JSON.stringify(found));
-    setUser(found);
-    return found;
-  }
+    
+    // 2. EXTRAER DATO ÚTIL
+    const usernameFromEmail = email.split('@')[0];
+    
+    // 3. CREAR OBJETO SIMPLIFICADO
+    // Creamos un objeto simple solo con el nombre y el email para que HomeScreen no falle
+    const userToStore = {
+        name: usernameFromEmail, // Usamos el username como nombre principal
+        email: email,
+        isSimpleLogin: true,
+    };
+
+    // 🛑 CLAVE: Guardar el objeto simple en AsyncStorage
+    await AsyncStorage.setItem(KEY, JSON.stringify(userToStore));
+    
+    // 🛑 CLAVE: Establecer el estado con el objeto
+    setUser(userToStore); 
+    
+    return userToStore;
+}
 
   async function signOut() {
     await AsyncStorage.removeItem(KEY);

@@ -75,3 +75,58 @@ export async function updateEvento(id, patch) {
   await saveEventos(next);
   return updated;
 }
+
+
+
+// Simulación de AsyncStorage o cualquier otra librería de almacenamiento local
+// Reemplaza esto con tu lógica real de almacenamiento si es diferente.
+
+
+const CHATS_KEY = '@EventMaster:Chats';
+
+// Función auxiliar para obtener todos los chats
+async function getChatsStorage() {
+  try {
+    const data = await AsyncStorage.getItem(CHATS_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (e) {
+    console.error('Error al obtener chats:', e);
+    return {};
+  }
+}
+
+// Función auxiliar para guardar todos los chats
+async function saveChatsStorage(chats) {
+  try {
+    await AsyncStorage.setItem(CHATS_KEY, JSON.stringify(chats));
+  } catch (e) {
+    console.error('Error al guardar chats:', e);
+  }
+}
+
+/**
+ * Carga los mensajes de chat para un evento específico.
+ * @param {string} eventId - El ID del evento.
+ * @returns {Array} Lista de mensajes.
+ */
+export async function getChatMessages(eventId) {
+  const allChats = await getChatsStorage();
+  // Los mensajes se almacenan en orden de envío, pero retornamos una copia.
+  return allChats[eventId] ? [...allChats[eventId]] : [];
+}
+
+/**
+ * Añade un nuevo mensaje a un evento y lo guarda.
+ * @param {string} eventId - El ID del evento.
+ * @param {object} message - El objeto del mensaje ({ id, text, userId, timestamp }).
+ */
+export async function addChatMessage(eventId, message) {
+  const allChats = await getChatsStorage();
+  const eventMessages = allChats[eventId] || [];
+
+  // Agregar el nuevo mensaje (lo ponemos al final)
+  eventMessages.push(message);
+
+  allChats[eventId] = eventMessages;
+  await saveChatsStorage(allChats);
+}
